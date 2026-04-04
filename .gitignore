@@ -19,3 +19,9 @@ inference_results.json
 # OS
 .DS_Store
 Thumbs.db
+
+.venv
+venv
+__pycache__/
+.env
+*.pyc

@@ -1,16 +1,3 @@
----
-title: Equity Research Environment
-emoji: 📊
-colorFrom: blue
-colorTo: green
-sdk: docker
-pinned: false
-app_port: 8000
-base_path: /web
-tags:
-  - openenv
----
-
 # Equity Research Environment
 
 A structured 4-step equity research workflow where an AI agent analyzes real financial data and recent news to perform multi-step reasoning and generate an investment thesis.
@@ -18,6 +5,7 @@ A structured 4-step equity research workflow where an AI agent analyzes real fin
 The environment simulates how real-world financial analysts combine quantitative fundamentals with qualitative signals (news and sentiment) to make investment decisions.
 
 Based on 11 real Indian companies across sectors.
+
 ---
 
 ## Motivation
@@ -139,7 +127,6 @@ Each metric is considered correct if within **5% relative error** of ground trut
 
 ```
 reward = (correct_metrics / 8) × 0.20
-
 ```
 
 Partial credit is awarded proportionally.
@@ -181,7 +168,6 @@ A weak agent defaulting to "neutral" without proper reasoning will receive low r
 
 ---
 
-```markdown
 ## Reward Function
 
 Rewards are distributed across all steps:
@@ -339,5 +325,4 @@ RL hackathon/
 │       ├── my_env_environment.py
 │       ├── Dockerfile
 │       └── requirements.txt
-
 ```
