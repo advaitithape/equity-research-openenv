@@ -1,3 +1,16 @@
+---
+title: Equity Research Environment
+emoji: 📊
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+app_port: 8000
+base_path: /web
+tags:
+  - openenv
+---
+
 # Equity Research Environment
 
 A structured 4-step equity research workflow where an AI agent analyzes real financial data and recent news to perform multi-step reasoning and generate an investment thesis.
