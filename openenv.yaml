@@ -1,0 +1,68 @@
+spec_version: 1
+name: equity_research_env
+type: space
+runtime: fastapi
+app: server.app:app
+port: 8000
+
+description: >
+  A 4-step structured equity research workflow environment where an AI agent
+  analyzes real financial data and news to compute metrics, identify trends,
+  select signals, and produce an investment thesis.
+  Based on 11 real Indian companies across sectors.
+
+author: RL Hackathon Team
+version: 2.0.0
+license: MIT
+
+tasks:
+  - id: compute_metrics
+    description: Compute 8 financial metrics from 3 years of raw financial data.
+    difficulty: easy
+    reward_weight: 0.20
+    reward_range: [0.0, 0.20]
+
+  - id: analyze_trend
+    description: Identify company trajectory (improving/stable/deteriorating) from multi-year data.
+    difficulty: medium
+    reward_weight: 0.10
+    reward_range: [0.0, 0.10]
+
+  - id: select_labels
+    description: Select 2-5 labels describing the company using metrics and news.
+    difficulty: medium
+    reward_weight: 0.20
+    reward_range: [0.0, 0.20]
+
+  - id: choose_thesis
+    description: Choose investment thesis (bullish/neutral/bearish) consistent with analysis.
+    difficulty: hard
+    reward_weight: 0.25
+    reward_range: [0.0, 0.25]
+
+observation_space:
+  company: string
+  ticker: string
+  financials: object
+  news: list[string]
+  current_step: integer
+  task_description: string
+  available_actions: list[string]
+  computed_metrics: object
+  trend: string
+  selected_labels: list[string]
+  chosen_thesis: string
+  cumulative_reward: float
+
+action_space:
+  type: string
+  data: any
+
+reward:
+  min: -0.5
+  max: 1.0
+  structure: step-wise partial rewards with penalties
+
+episode:
+  steps: 4
+  companies: [reliance, hdfc, infosys, lnt, tata_power, tcs, itc, hul, sjvn, adani_enterprises, std_capital]

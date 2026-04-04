@@ -1,0 +1,21 @@
+# Environment variables — never commit this
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+*.egg
+
+# Results
+baseline_results.json
+inference_results.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,5 @@
+openenv[core]>=0.1.13
+fastapi>=0.115.0
+uvicorn>=0.24.0
+pandas
+openenv

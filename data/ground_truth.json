@@ -1,0 +1,188 @@
+{
+  "adani_enterprises": {
+    "metrics": {
+      "pe_ratio": 33.31,
+      "pb_ratio": 4.71,
+      "operating_margin": 14.7,
+      "net_profit_margin": 7.26,
+      "roe": 14.14,
+      "debt_to_equity": 1.82,
+      "interest_coverage": 2.26,
+      "revenue_growth": 1.53
+    },
+    "labels": ["high_debt", "weak_cashflow", "regulatory_risk", "margin_pressure"],
+    "trend": "deteriorating",
+    "thesis": "bearish",
+    "allocation": 20
+  },
+
+  "hdfc": {
+    "metrics": {
+      "pe_ratio": 15.91,
+      "pb_ratio": 2.16,
+      "operating_margin": 39.26,
+      "net_profit_margin": 21.05,
+      "roe": 13.57,
+      "debt_to_equity": 6.41,
+      "interest_coverage": 0.73,
+      "revenue_growth": 18.59
+    },
+    "labels": ["strong_growth", "business_expansion", "strong_market_position", "regulatory_risk"],
+    "trend": "improving",
+    "thesis": "neutral",
+    "allocation": 60
+  },
+
+  "hul": {
+    "metrics": {
+      "pe_ratio": 45.57,
+      "pb_ratio": 9.82,
+      "operating_margin": 23.08,
+      "net_profit_margin": 16.87,
+      "roe": 21.56,
+      "debt_to_equity": 0.03,
+      "interest_coverage": 35.56,
+      "revenue_growth": 1.98
+    },
+    "labels": ["high_profitability", "strong_market_position"],
+    "trend": "stable",
+    "thesis": "neutral",
+    "allocation": 45
+  },
+
+  "infosys": {
+    "metrics": {
+      "pe_ratio": 18.99,
+      "pb_ratio": 5.29,
+      "operating_margin": 23.67,
+      "net_profit_margin": 16.39,
+      "roe": 27.88,
+      "debt_to_equity": 0.09,
+      "interest_coverage": 99.24,
+      "revenue_growth": 6.06
+    },
+    "labels": ["high_profitability", "business_expansion", "strong_market_position"],
+    "trend": "stable",
+    "thesis": "bullish",
+    "allocation": 75
+  },
+
+  "itc": {
+    "metrics": {
+      "pe_ratio": 10.56,
+      "pb_ratio": 5.24,
+      "operating_margin": 33.72,
+      "net_profit_margin": 46.13,
+      "roe": 49.62,
+      "debt_to_equity": 0.0,
+      "interest_coverage": 402.29,
+      "revenue_growth": 10.88
+    },
+    "labels": ["high_profitability", "strong_growth", "strong_market_position"],
+    "trend": "improving",
+    "thesis": "bullish",
+    "allocation": 70
+  },
+
+  "lnt": {
+    "metrics": {
+      "pe_ratio": 32.06,
+      "pb_ratio": 4.94,
+      "operating_margin": 12.83,
+      "net_profit_margin": 5.88,
+      "roe": 15.4,
+      "debt_to_equity": 1.36,
+      "interest_coverage": 3.64,
+      "revenue_growth": 15.66
+    },
+    "labels": ["high_debt", "margin_pressure", "strong_growth", "business_expansion"],
+    "trend": "improving",
+    "thesis": "bullish",
+    "allocation": 65
+  },
+
+  "reliance": {
+    "metrics": {
+      "pe_ratio": 26.11,
+      "pb_ratio": 2.16,
+      "operating_margin": 17.44,
+      "net_profit_margin": 7.23,
+      "roe": 8.26,
+      "debt_to_equity": 0.44,
+      "interest_coverage": 6.71,
+      "revenue_growth": 7.09
+    },
+    "labels": ["business_expansion", "renewable_transition", "margin_pressure"],
+    "trend": "stable",
+    "thesis": "neutral",
+    "allocation": 50
+  },
+
+  "sjvn": {
+    "metrics": {
+      "pe_ratio": 32.29,
+      "pb_ratio": 1.87,
+      "operating_margin": 72.99,
+      "net_profit_margin": 26.68,
+      "roe": 5.78,
+      "debt_to_equity": 1.91,
+      "interest_coverage": 2.76,
+      "revenue_growth": 19.1
+    },
+    "labels": ["strong_growth", "renewable_transition", "high_debt"],
+    "trend": "improving",
+    "thesis": "bullish",
+    "allocation": 65
+  },
+
+  "std_capital": {
+    "metrics": {
+      "pe_ratio": 3.35,
+      "pb_ratio": 0.26,
+      "operating_margin": 93.84,
+      "net_profit_margin": 30.71,
+      "roe": 7.89,
+      "debt_to_equity": 3.21,
+      "interest_coverage": 1.24,
+      "revenue_growth": 192.96
+    },
+    "labels": ["high_debt", "weak_cashflow", "strong_growth"],
+    "trend": "deteriorating",
+    "thesis": "bearish",
+    "allocation": 40
+  },
+
+  "tata_power": {
+    "metrics": {
+      "pe_ratio": 30.48,
+      "pb_ratio": 3.38,
+      "operating_margin": 20.08,
+      "net_profit_margin": 6.06,
+      "roe": 11.08,
+      "debt_to_equity": 1.75,
+      "interest_coverage": 2.51,
+      "revenue_growth": 6.56
+    },
+    "labels": ["high_debt", "renewable_transition", "business_expansion"],
+    "trend": "stable",
+    "thesis": "bullish",
+    "allocation": 65
+  },
+
+  "tcs": {
+    "metrics": {
+      "pe_ratio": 18.26,
+      "pb_ratio": 9.36,
+      "operating_margin": 26.88,
+      "net_profit_margin": 19.02,
+      "roe": 51.24,
+      "debt_to_equity": 0.1,
+      "interest_coverage": 58.96,
+      "revenue_growth": 5.99
+    },
+    "labels": ["high_profitability", "business_expansion", "strong_market_position"],
+    "trend": "stable",
+    "thesis": "bullish",
+    "allocation": 75
+  }
+}
