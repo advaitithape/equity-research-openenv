@@ -42,7 +42,7 @@ Each episode corresponds to one company. The agent receives raw financial data (
 | 3 | Select 2–5 labels using metrics and news | Medium | 0.30 |
 | 4 | Choose investment thesis (bullish / neutral / bearish) | Hard | 0.30 |
 
-**Total possible reward per episode: 0.75**
+**Total possible reward per episode: 0.1**
 
 The agent must combine:
 - financial metrics (long-term fundamentals)
@@ -133,13 +133,13 @@ Valid values: `bullish`, `neutral`, `bearish`
 
 ## Grading Logic
 
-### Step 1 — compute_metrics (max 0.20)
+### Step 1 — compute_metrics (max 0.30)
 The agent computes 8 financial metrics from raw data.
 
 Each metric is considered correct if within **5% relative error** of ground truth.
 
 ```
-reward = (correct_metrics / 8) × 0.20
+reward = (correct_metrics / 8) × 0.30
 ```
 
 Partial credit is awarded proportionally.
@@ -153,21 +153,21 @@ Reward is assigned based on correctness of the predicted trend.
 
 ---
 
-### Step 3 — select_labels (max 0.20)
+### Step 3 — select_labels (max 0.30)
 The agent selects 2–5 labels using financial data and news.
 
 Graded using F1 score against ground truth:
 
 
 ```
-reward = F1(predicted_labels, ground_truth_labels) × 0.20
+reward = F1(predicted_labels, ground_truth_labels) × 0.30
 ```
 
 Partial overlap receives partial credit.
 
 ---
 
-### Step 4 — choose_thesis (max 0.25)
+### Step 4 — choose_thesis (max 0.30)
 The agent selects a final investment thesis.
 
 Reward is based on:
