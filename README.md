@@ -215,7 +215,7 @@ Reliance Industries, HDFC Bank, Infosys, Larsen & Toubro, Tata Power, TCS, ITC, 
 
 Baseline agent: `gpt-4o-mini` at temperature 0.0
 
-**Average Score: ~0.52**
+**Average Score: ~0.6503**
 
 This reflects a non-trivial environment where:
 - weak agents underperform
