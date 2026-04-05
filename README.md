@@ -37,10 +37,10 @@ Each episode corresponds to one company. The agent receives raw financial data (
 
 | Step | Task | Difficulty | Max Reward |
 |------|------|------------|------------|
-| 1 | Compute 8 financial metrics from raw data | Easy | 0.20 |
+| 1 | Compute 8 financial metrics from raw data | Easy | 0.30 |
 | 2 | Analyze trend (improving / stable / deteriorating) | Medium | 0.10 |
-| 3 | Select 2–5 labels using metrics and news | Medium | 0.20 |
-| 4 | Choose investment thesis (bullish / neutral / bearish) | Hard | 0.25 |
+| 3 | Select 2–5 labels using metrics and news | Medium | 0.30 |
+| 4 | Choose investment thesis (bullish / neutral / bearish) | Hard | 0.30 |
 
 **Total possible reward per episode: 0.75**
 
@@ -282,7 +282,7 @@ python inference.py
 
 ```bash
 # Build
-docker build -t equity-research-env:latest -f my_env/server/Dockerfile my_env/
+docker build -t equity-research-env:latest .
 
 # Run
 docker run -p 8000:8000 equity-research-env:latest
@@ -319,23 +319,20 @@ docker run -p 8000:8000 equity-research-env:latest
 ## Project Structure
 
 ```
-RL hackathon/
+equity-research-openenv/
 ├── inference.py
-├── openenv.yaml
 ├── README.md
-├── my_env/
-│   ├── __init__.py
-│   ├── client.py
-│   ├── models.py
-│   ├── pyproject.toml
-│   ├── data/
-│   │   ├── financials.json
-│   │   ├── ground_truth.json
-│   │   └── news.json
-│   └── server/
-│       ├── __init__.py
-│       ├── app.py
-│       ├── my_env_environment.py
-│       ├── Dockerfile
-│       └── requirements.txt
+├── openenv.yaml
+├── models.py
+├── client.py
+├── pyproject.toml
+├── uv.lock
+├── Dockerfile
+├── data/
+│   ├── financials.json
+│   ├── ground_truth.json
+│   └── news.json
+└── server/
+    ├── app.py
+    └── my_env_environment.py
 ```
