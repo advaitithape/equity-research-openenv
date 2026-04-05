@@ -42,7 +42,7 @@ Each episode corresponds to one company. The agent receives raw financial data (
 | 3 | Select 2–5 labels using metrics and news | Medium | 0.30 |
 | 4 | Choose investment thesis (bullish / neutral / bearish) | Hard | 0.30 |
 
-**Total possible reward per episode: 0.1**
+**Total possible reward per episode: 1.0**
 
 The agent must combine:
 - financial metrics (long-term fundamentals)
