@@ -1,11 +1,10 @@
 """
 Equity Research Workflow Environment — 5-Step Version.
 
-Step 1 — compute_metrics:    Compute 8 financial ratios     (max reward 0.25)
+Step 1 — compute_metrics:    Compute 8 financial ratios     (max reward 0.30)
 Step 2 — analyze_trend:      Identify company trajectory    (max reward 0.10)
-Step 3 — select_labels:      Select risk/strength labels    (max reward 0.25)
-Step 4 — choose_thesis:      Choose investment thesis       (max reward 0.25)
-Step 5 — allocate_portfolio: Recommend allocation %         (max reward 0.15)
+Step 3 — select_labels:      Select risk/strength labels    (max reward 0.30)
+Step 4 — choose_thesis:      Choose investment thesis       (max reward 0.30)
 
 Total possible reward: 1.0
 Penalties (-0.05) for wrong action types or empty submissions.
@@ -184,8 +183,8 @@ TASK_DESCRIPTIONS = {
 
 def _grade_metrics(predicted: dict, ground_truth: dict) -> tuple:
     """
-    Max reward: 0.25
-    Each of 8 metrics worth (1/8) * 0.25
+    Max reward: 0.30
+    Each of 8 metrics worth (1/8) * 0.30
     Tolerance: 5% relative error
     Penalty: -0.05 for empty submission
     """
@@ -223,9 +222,9 @@ def _grade_metrics(predicted: dict, ground_truth: dict) -> tuple:
                 f"  x {metric}: {pred_val:.2f} (~{gt_val:.2f}, err={error*100:.1f}%)"
             )
 
-    reward   = round((correct / len(required)) * 0.25, 4)
+    reward   = round((correct / len(required)) * 0.30, 4)
     feedback = (
-        f"Metrics: {correct}/{len(required)} correct (reward={reward:.4f}/0.25)\n"
+        f"Metrics: {correct}/{len(required)} correct (reward={reward:.4f}/0.30)\n"
         + "\n".join(lines)
     )
     return reward, feedback
@@ -278,8 +277,8 @@ def _grade_trend(predicted: str, ground_truth: str) -> tuple:
 
 def _grade_labels(predicted: list, ground_truth: list) -> tuple:
     """
-    Max reward: 0.25
-    F1 score against ground truth labels * 0.25
+    Max reward: 0.30
+    F1 score against ground truth labels * 0.30
     Penalty: -0.05 for empty or all-invalid labels
     """
     if not isinstance(predicted, list) or len(predicted) == 0:
@@ -304,9 +303,9 @@ def _grade_labels(predicted: list, ground_truth: list) -> tuple:
         if (precision + recall) > 0 else 0
     )
 
-    reward   = round(f1 * 0.25, 4)
+    reward   = round(f1 * 0.30, 4)
     feedback = (
-        f"Labels: F1={f1:.2f} (reward={reward:.4f}/0.25)\n"
+        f"Labels: F1={f1:.2f} (reward={reward:.4f}/0.30)\n"
         f"  Selected: {sorted(pred_set)}\n"
         f"  Expected: {sorted(gt_set)}\n"
         f"  Correct:  {sorted(pred_set & gt_set)}\n"
@@ -322,7 +321,7 @@ def _grade_thesis(
     pred_trend: str, gt_trend: str
 ) -> tuple:
     """
-    Max reward: 0.25
+    Max reward: 0.30
     +0.15 correct thesis label
     +0.10 thesis consistent with labels AND trend
     Penalty: -0.05 for invalid thesis
@@ -345,8 +344,8 @@ def _grade_thesis(
 
     # Part 1: correct thesis (0.15)
     if predicted == gt_thesis:
-        reward += 0.15
-        lines.append(f"  ok Thesis correct: '{predicted}' (+0.15)")
+        reward += 0.18
+        lines.append(f"  ok Thesis correct: '{predicted}' (+0.18)")
     else:
         lines.append(
             f"  x Thesis wrong: '{predicted}' vs '{gt_thesis}' (+0.0)"
@@ -381,22 +380,22 @@ def _grade_thesis(
     gt_overlap = len(pred_set & set(gt_labels)) / max(len(set(gt_labels)), 1)
 
     if label_consistent and trend_consistent and gt_overlap >= 0.4:
-        reward += 0.10
+        reward += 0.12
         lines.append(
             f"  ok Thesis consistent with labels+trend "
-            f"(overlap={gt_overlap:.0%}) (+0.10)"
+            f"(overlap={gt_overlap:.0%}) (+0.12)"
         )
     elif label_consistent or trend_consistent:
-        reward += 0.05
+        reward += 0.06
         lines.append(
-            f"  ~ Thesis partially consistent (+0.05)"
+            f"  ~ Thesis partially consistent (+0.06)"
         )
     else:
         lines.append(f"  x Thesis inconsistent with labels+trend (+0.0)")
 
     reward   = round(reward, 4)
     feedback = (
-        f"Thesis graded (reward={reward:.4f}/0.25)\n" + "\n".join(lines)
+        f"Thesis graded (reward={reward:.4f}/0.30)\n" + "\n".join(lines)
     )
     return reward, feedback
 
@@ -408,11 +407,10 @@ class MyEnvironment(Environment):
     Equity Research Workflow Environment — 5 Steps.
 
     Reward structure:
-      Step 1 compute_metrics:    max 0.25
+      Step 1 compute_metrics:    max 0.30
       Step 2 analyze_trend:      max 0.10
-      Step 3 select_labels:      max 0.25
-      Step 4 choose_thesis:      max 0.25
-      Step 5 allocate_portfolio: max 0.15
+      Step 3 select_labels:      max 0.30
+      Step 4 choose_thesis:      max 0.30
       Total:                     max 1.00
 
     Penalties: -0.05 for wrong action type or empty/invalid submission.
