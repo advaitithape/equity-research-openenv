@@ -6,7 +6,7 @@ Data models for the Equity Research Environment.
   Step 2 - analyze_trend:      Agent identifies company trajectory
   Step 3 - select_labels:      Agent selects relevant labels from predefined list
   Step 4 - choose_thesis:      Agent chooses final investment thesis
-  Step 5 - allocate_portfolio: Agent recommends portfolio allocation % (0-100)
+  
 """
 
 from typing import Any, Dict, List, Optional
@@ -27,6 +27,10 @@ ALL_LABELS = [
     "business_expansion",
     "renewable_transition",
     "strong_market_position",
+    "management_risk", 
+    "valuation_concern", 
+    "sector_tailwind", 
+    "capex_heavy",
 ]
 
 VALID_THESIS = ["bullish", "neutral", "bearish"]
