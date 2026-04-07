@@ -620,7 +620,7 @@ class MyEnvironment(Environment):
                 trend=self._trend,
                 selected_labels=self._labels,
                 chosen_thesis=self._thesis,
-                cumulative_reward=round(self._reward, 4),
+                cumulative_reward=round(min(max(self._reward, 0.0001), 0.9999), 4),
                 done=True,
                 reward=0.0,
             )
