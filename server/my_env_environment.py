@@ -44,6 +44,13 @@ def _load_json(filename: str) -> dict:
     with open(path, "r") as f:
         return json.load(f)
 
+def _clip_score(score: float) -> float:
+    eps = 0.01
+    if score <= 0.0:
+        return eps
+    if score >= 1.0:
+        return 1.0 - eps
+    return score
 
 def _build_agent_financials(raw: dict) -> dict:
     """
@@ -222,7 +229,10 @@ def _grade_metrics(predicted: dict, ground_truth: dict) -> tuple:
                 f"  x {metric}: {pred_val:.2f} (~{gt_val:.2f}, err={error*100:.1f}%)"
             )
 
-    reward   = round((correct / len(required)) * 0.30, 4)
+    reward = (correct / len(required)) * 0.30
+    reward = _clip_score(reward)
+    reward = round(reward, 4)
+    
     feedback = (
         f"Metrics: {correct}/{len(required)} correct (reward={reward:.4f}/0.30)\n"
         + "\n".join(lines)
@@ -271,7 +281,7 @@ def _grade_trend(predicted: str, ground_truth: str) -> tuple:
                 f"Trend wrong: got '{predicted}', expected '{ground_truth}' "
                 f"(reward=0.00/0.10)"
             )
-
+    reward = _clip_score(reward)
     return round(reward, 4), feedback
 
 
@@ -303,7 +313,10 @@ def _grade_labels(predicted: list, ground_truth: list) -> tuple:
         if (precision + recall) > 0 else 0
     )
 
-    reward   = round(f1 * 0.30, 4)
+    reward = f1 * 0.30
+    reward = _clip_score(reward)
+    reward = round(reward, 4)
+    
     feedback = (
         f"Labels: F1={f1:.2f} (reward={reward:.4f}/0.30)\n"
         f"  Selected: {sorted(pred_set)}\n"
@@ -393,7 +406,9 @@ def _grade_thesis(
     else:
         lines.append(f"  x Thesis inconsistent with labels+trend (+0.0)")
 
-    reward   = round(reward, 4)
+    reward = _clip_score(reward)
+    reward = round(reward, 4)
+    
     feedback = (
         f"Thesis graded (reward={reward:.4f}/0.30)\n" + "\n".join(lines)
     )
@@ -600,7 +615,7 @@ class MyEnvironment(Environment):
                 trend=self._trend, 
                 selected_labels=self._labels, 
                 chosen_thesis=self._thesis, 
-                cumulative_reward=round(self._reward, 4), 
+                cumulative_reward=round(min(max(self._reward, 0.0001), 0.9999), 4), 
                 done=True, 
                 reward=reward, 
             )
