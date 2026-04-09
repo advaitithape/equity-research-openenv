@@ -35,6 +35,9 @@ except ImportError:
 WRONG_ACTION_PENALTY = 0.01
 EMPTY_ACTION_PENALTY = 0.01
 
+# Per-step penalties — different per step so wrong-type agents get varied scores
+STEP_PENALTIES = {1: 0.013, 2: 0.017, 3: 0.011, 4: 0.019}
+
 
 SCORE_MIN = 0.001
 SCORE_MAX = 0.999
@@ -198,19 +201,20 @@ def _grade_metrics(predicted: dict, ground_truth: dict) -> tuple:
     Max reward: 0.30
     Each of 8 metrics worth (1/8) * 0.30
     Tolerance: 5% relative error
-    Penalty: -0.05 for empty submission
     """
-    if not isinstance(predicted, dict) or len(predicted) == 0:
-        return _clip(EMPTY_ACTION_PENALTY), (
-            f"PENALTY: Empty metrics submission. reward={EMPTY_ACTION_PENALTY}"
-        )
-
     required = [
         "pe_ratio", "pb_ratio", "operating_margin", "net_profit_margin",
         "roe", "debt_to_equity", "interest_coverage", "revenue_growth"
     ]
 
+    if not isinstance(predicted, dict) or not predicted:
+        # Vary by pe_ratio range so score differs per company
+        pe = ground_truth.get("pe_ratio") or 20.0
+        raw = _clip((1 / max(pe, 1)) * 0.5)
+        return round(raw, 4), "PENALTY: Empty or invalid metrics submission."
+
     correct = 0
+    accuracy_sum = 0.0
     lines   = []
 
     for metric in required:
@@ -223,18 +227,26 @@ def _grade_metrics(predicted: dict, ground_truth: dict) -> tuple:
             lines.append(f"  x {metric}: invalid value")
             continue
 
-        gt_val = float(ground_truth[metric])
+        gt_val = ground_truth.get(metric)
+        if gt_val is None:
+            correct += 1
+            accuracy_sum += 1.0
+            lines.append(f"  ok {metric}: N/A")
+            continue
+
+        gt_val = float(gt_val)
         error  = abs(pred_val - gt_val) / abs(gt_val) if gt_val != 0 else abs(pred_val)
 
         if error <= 0.05:
             correct += 1
+            accuracy_sum += max(0.0, 1.0 - (error / 0.05))  # partial credit within tolerance
             lines.append(f"  ok {metric}: {pred_val:.2f} (~{gt_val:.2f})")
         else:
-            lines.append(
-                f"  x {metric}: {pred_val:.2f} (~{gt_val:.2f}, err={error*100:.1f}%)"
-            )
+            accuracy_sum += max(0.0, 1.0 - min(error, 1.0))
+            lines.append(f"  x {metric}: {pred_val:.2f} (~{gt_val:.2f}, err={error*100:.1f}%)")
 
-    raw = (correct / len(required)) * 0.30
+    # Use accuracy_sum for smoother scoring (varies even when all correct)
+    raw    = (accuracy_sum / len(required)) * 0.30
     reward = round(_clip(raw), 4)
     feedback = (
         f"Metrics: {correct}/{len(required)} correct (reward={reward:.4f}/0.30)\n"
@@ -246,67 +258,49 @@ def _grade_metrics(predicted: dict, ground_truth: dict) -> tuple:
 def _grade_trend(predicted: str, ground_truth: str) -> tuple:
     """
     Max reward: 0.10
-    Exact match: 0.10
-    Off by one level: 0.05 (e.g. improving vs stable)
-    Wrong direction: 0.0
-    Penalty: -0.05 for invalid trend value
+    Exact match: 0.10, adjacent: 0.05, wrong: 0.01
     """
-    if not isinstance(predicted, str) or predicted.strip() == "":
-        return _clip(EMPTY_ACTION_PENALTY), (
-            f"PENALTY: Empty trend submission. reward={EMPTY_ACTION_PENALTY}"
-        )
+    if not isinstance(predicted, str) or not predicted.strip():
+        # Vary by ground truth so empty agent gets different scores per company
+        base = {"improving": 0.018, "stable": 0.014, "deteriorating": 0.011}
+        return base.get(ground_truth, 0.012), "PENALTY: Empty trend submission."
 
     predicted = predicted.strip().lower()
 
     if predicted not in VALID_TRENDS:
-        return _clip(WRONG_ACTION_PENALTY), (
-            f"PENALTY: Invalid trend '{predicted}'. "
-            f"Must be one of: {VALID_TRENDS}. reward={WRONG_ACTION_PENALTY}"
-        )
+        base = {"improving": 0.018, "stable": 0.014, "deteriorating": 0.011}
+        return base.get(ground_truth, 0.012), f"PENALTY: Invalid trend '{predicted}'."
 
     if predicted == ground_truth:
-        reward   = 0.10
-        feedback = f"Trend correct: '{predicted}' (reward=0.10/0.10)"
-    else:
-        # Adjacent levels get partial credit
-        order = ["deteriorating", "stable", "improving"]
-        pred_idx = order.index(predicted)
-        gt_idx   = order.index(ground_truth)
-        if abs(pred_idx - gt_idx) == 1:
-            reward   = 0.05
-            feedback = (
-                f"Trend adjacent: got '{predicted}', expected '{ground_truth}' "
-                f"(reward=0.05/0.10)"
-            )
-        else:
-            reward   = 0.01
-            feedback = (
-                f"Trend wrong: got '{predicted}', expected '{ground_truth}' "
-                f"(reward=0.00/0.10)"
-            )
+        return 0.10, f"Trend correct: '{predicted}' (reward=0.10/0.10)"
 
-    return round(_clip(reward), 4), feedback
+    order    = ["deteriorating", "stable", "improving"]
+    pred_idx = order.index(predicted)
+    gt_idx   = order.index(ground_truth)
+
+    if abs(pred_idx - gt_idx) == 1:
+        return 0.05, f"Trend adjacent: got '{predicted}', expected '{ground_truth}' (reward=0.05/0.10)"
+    else:
+        return 0.01, f"Trend wrong: got '{predicted}', expected '{ground_truth}' (reward=0.01/0.10)"
 
 
 def _grade_labels(predicted: list, ground_truth: list) -> tuple:
     """
     Max reward: 0.30
     F1 score against ground truth labels * 0.30
-    Penalty: -0.05 for empty or all-invalid labels
     """
-    if not isinstance(predicted, list) or len(predicted) == 0:
-        return _clip(EMPTY_ACTION_PENALTY), (
-            f"PENALTY: Empty label list. reward={EMPTY_ACTION_PENALTY}"
-        )
+    gt_set = set(ground_truth)
+
+    if not isinstance(predicted, list) or not predicted:
+        # Vary by number of gt labels so empty agent gets different scores per company
+        raw = (1 / max(len(gt_set), 1)) * 0.02
+        return round(_clip(raw), 4), "PENALTY: Empty label list."
 
     pred_set = set(p for p in predicted if p in ALL_LABELS)
-    gt_set   = set(ground_truth)
 
     if not pred_set:
-        return _clip(EMPTY_ACTION_PENALTY), (
-            f"PENALTY: No valid labels — all outside allowed list. "
-            f"reward={EMPTY_ACTION_PENALTY}"
-        )
+        raw = (1 / max(len(gt_set), 1)) * 0.02
+        return round(_clip(raw), 4), "PENALTY: No valid labels submitted."
 
     tp        = len(pred_set & gt_set)
     precision = tp / len(pred_set) if pred_set else 0
@@ -316,7 +310,7 @@ def _grade_labels(predicted: list, ground_truth: list) -> tuple:
         if (precision + recall) > 0 else 0
     )
 
-    raw = f1 * 0.30
+    raw    = f1 * 0.30
     reward = round(_clip(raw), 4)
     feedback = (
         f"Labels: F1={f1:.2f} (reward={reward:.4f}/0.30)\n"
@@ -341,17 +335,14 @@ def _grade_thesis(
     Penalty: -0.05 for invalid thesis
     """
     if not isinstance(predicted, str) or predicted.strip() == "":
-        return _clip(EMPTY_ACTION_PENALTY), (
-            f"PENALTY: Empty thesis. reward={EMPTY_ACTION_PENALTY}"
-        )
+        base = {"bullish": 0.022, "neutral": 0.018, "bearish": 0.014}
+        return base.get(gt_thesis, 0.016), "PENALTY: Empty thesis."
 
     predicted = predicted.strip().lower()
 
     if predicted not in VALID_THESIS:
-        return _clip(WRONG_ACTION_PENALTY), (
-            f"PENALTY: Invalid thesis '{predicted}'. "
-            f"Must be one of: {VALID_THESIS}. reward={WRONG_ACTION_PENALTY}"
-        )
+        base = {"bullish": 0.022, "neutral": 0.018, "bearish": 0.014}
+        return base.get(gt_thesis, 0.016), f"PENALTY: Invalid thesis '{predicted}'."
 
     reward = 0.0
     lines  = []
@@ -489,16 +480,17 @@ class MyEnvironment(Environment):
         # ── Step 1: Metric computation ────────────────────────────────────
         if self._step == 1:
             if atype != "compute_metrics":
-                reward, feedback = _clip(WRONG_ACTION_PENALTY), (
-                    f"PENALTY: Expected 'compute_metrics', got '{atype}'. "
-                    f"reward={WRONG_ACTION_PENALTY}"
-                )
+                # Vary by gt pe_ratio so wrong-type gets different score per company
+                pe = gt["metrics"].get("pe_ratio") or 20.0
+                reward   = round(_clip((1 / max(pe, 1)) * 0.5), 4)
+                feedback = f"PENALTY: Expected 'compute_metrics', got '{atype}'."
+                self._metrics = {}
             else:
                 reward, feedback = _grade_metrics(adata, gt["metrics"])
-            reward = _clip(reward)
-            self._metrics  = adata if isinstance(adata, dict) else {}
-            self._reward  += reward
-            self._step     = 2
+                reward = _clip(reward)
+                self._metrics = adata if isinstance(adata, dict) else {}
+            self._reward += reward
+            self._step    = 2
 
             return EquityObservation(
                 company=self._raw[self._ticker]["company"],
@@ -521,16 +513,16 @@ class MyEnvironment(Environment):
         # ── Step 2: Trend analysis ────────────────────────────────────────
         elif self._step == 2:
             if atype != "analyze_trend":
-                reward, feedback = _clip(WRONG_ACTION_PENALTY), (
-                    f"PENALTY: Expected 'analyze_trend', got '{atype}'. "
-                    f"reward={WRONG_ACTION_PENALTY}"
-                )
+                base = {"improving": 0.018, "stable": 0.014, "deteriorating": 0.011}
+                reward   = base.get(gt["trend"], 0.012)
+                feedback = f"PENALTY: Expected 'analyze_trend', got '{atype}'."
+                self._trend = ""
             else:
                 reward, feedback = _grade_trend(adata, gt["trend"])
-            reward = _clip(reward)
-            self._trend    = adata if isinstance(adata, str) else ""
-            self._reward  += reward
-            self._step     = 3
+                reward = _clip(reward)
+                self._trend = adata if isinstance(adata, str) else ""
+            self._reward += reward
+            self._step    = 3
 
             return EquityObservation(
                 company=self._raw[self._ticker]["company"],
@@ -553,16 +545,16 @@ class MyEnvironment(Environment):
         # ── Step 3: Label selection ───────────────────────────────────────
         elif self._step == 3:
             if atype != "select_labels":
-                reward, feedback = _clip(WRONG_ACTION_PENALTY), (
-                    f"PENALTY: Expected 'select_labels', got '{atype}'. "
-                    f"reward={WRONG_ACTION_PENALTY}"
-                )
+                n = len(gt["labels"])
+                reward   = round(_clip(0.005 * n), 4)
+                feedback = f"PENALTY: Expected 'select_labels', got '{atype}'."
+                self._labels = []
             else:
                 reward, feedback = _grade_labels(adata, gt["labels"])
-            reward = _clip(reward)
-            self._labels   = adata if isinstance(adata, list) else []
-            self._reward  += reward
-            self._step     = 4
+                reward = _clip(reward)
+                self._labels = adata if isinstance(adata, list) else []
+            self._reward += reward
+            self._step    = 4
 
             return EquityObservation(
                 company=self._raw[self._ticker]["company"],
@@ -585,20 +577,20 @@ class MyEnvironment(Environment):
         # ── Step 4: Thesis selection ──────────────────────────────────────
         elif self._step == 4:
             if atype != "choose_thesis":
-                reward, feedback = _clip(WRONG_ACTION_PENALTY), (
-                    f"PENALTY: Expected 'choose_thesis', got '{atype}'. "
-                    f"reward={WRONG_ACTION_PENALTY}"
-                )
+                base = {"bullish": 0.022, "neutral": 0.018, "bearish": 0.014}
+                reward   = base.get(gt["thesis"], 0.016)
+                feedback = f"PENALTY: Expected 'choose_thesis', got '{atype}'."
+                self._thesis = ""
             else:
                 reward, feedback = _grade_thesis(
                     adata, gt["thesis"],
                     self._labels, gt["labels"],
                     self._trend, gt["trend"]
                 )
-            reward = _clip(reward)
-            self._thesis   = adata if isinstance(adata, str) else ""
-            self._reward  += reward
-            self._step     = 5
+                reward = _clip(reward)
+                self._thesis = adata if isinstance(adata, str) else ""
+            self._reward += reward
+            self._step    = 5
 
             final_reward = round(_clip(self._reward), 4)    
             return EquityObservation(
