@@ -317,11 +317,13 @@ def run_episode(env: MyEnv, ticker: str) -> Dict:
             time.sleep(0.5)
 
         score   = round(sum(rewards), 4)
+        score   = min(max(score, 0.001), 0.999)  # strictly within (0, 1)
         success = score >= SUCCESS_SCORE_THRESHOLD
         log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
 
     except Exception as e:
         score = round(sum(rewards), 4)
+        score = min(max(score, 0.001), 0.999)
         log_end(success=False, steps=steps_taken, score=score, rewards=rewards)
         print(f"[DEBUG] Episode failed for {ticker}: {type(e).__name__}: {e}", flush=True)
         raise
