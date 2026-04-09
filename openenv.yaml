@@ -20,25 +20,25 @@ tasks:
     description: Compute 8 financial metrics from 3 years of raw financial data.
     difficulty: easy
     reward_weight: 0.30
-    reward_range: [0.001, 0.300]
+    reward_range: [0.001, 0.999]
 
   - id: analyze_trend
     description: Identify company trajectory (improving/stable/deteriorating) from multi-year data.
     difficulty: medium
     reward_weight: 0.10
-    reward_range: [0.001, 0.100]
+    reward_range: [0.001, 0.999]
 
   - id: select_labels
     description: Select 2-5 labels describing the company using metrics and news.
     difficulty: medium
     reward_weight: 0.30
-    reward_range: [0.001, 0.300]
+    reward_range: [0.001, 0.999]
 
   - id: choose_thesis
     description: Choose investment thesis (bullish/neutral/bearish) consistent with analysis.
     difficulty: hard
     reward_weight: 0.30
-    reward_range: [0.001, 0.300]
+    reward_range: [0.001, 0.999]
 
 observation_space:
   company: string
