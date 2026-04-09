@@ -470,6 +470,10 @@ class MyEnvironment(Environment):
 
     def step(self, action: EquityAction) -> EquityObservation:  # type: ignore[override]
         """Execute one step and return graded observation."""
+        # Auto-reset if env not initialized (handles stateless HTTP calls)
+        if not self._ticker or self._step == 0:
+            return self.reset()
+
         self._state.step_count += 1
 
         atype = getattr(action, "type", "")
@@ -615,11 +619,12 @@ class MyEnvironment(Environment):
 
         # ── Already complete ──────────────────────────────────────────────
         else:
+            company = self._raw.get(self._ticker, {}).get("company", "Unknown") if self._ticker else "Unknown"
             return EquityObservation(
-                company=self._raw[self._ticker]["company"],
-                ticker=self._ticker,
+                company=company,
+                ticker=self._ticker or "unknown",
                 financials=self._fin,
-                news=news,
+                news=self._news.get(self._ticker, []) if self._ticker else [],
                 current_step=6,
                 task_description="Episode complete. Call reset() to start a new episode.",
                 available_actions=[],
