@@ -470,9 +470,12 @@ class MyEnvironment(Environment):
 
     def step(self, action: EquityAction) -> EquityObservation:  # type: ignore[override]
         """Execute one step and return graded observation."""
-        # Auto-reset if env not initialized (handles stateless HTTP calls)
+        # Auto-initialize if env not initialized (handles stateless HTTP calls)
         if not self._ticker or self._step == 0:
-            return self.reset()
+            self._ticker = random.choice(self._tickers)
+            self._step   = 1
+            self._reward = 0.0
+            self._fin    = _build_agent_financials(self._raw[self._ticker])
 
         self._state.step_count += 1
 
